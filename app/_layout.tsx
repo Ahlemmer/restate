@@ -1,8 +1,18 @@
 import { Stack } from "expo-router";
+import { ClerkProvider, ClerkLoaded } from "@clerk/clerk-expo";
 import { useFonts } from "expo-font";
 import "./global.css";
 import { useEffect } from "react";
 import * as SplashScreen from "expo-splash-screen";
+import { tokenCache } from "@/lib/cashe";
+
+const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
+
+if (!publishableKey) {
+  throw new Error(
+    "Missing Publishable Key. Please set EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY in your .env"
+  );
+}
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
     "Rubik-Bold": require("../assets/fonts/Rubik-Bold.ttf"),
@@ -21,5 +31,15 @@ export default function RootLayout() {
   if (!fontsLoaded) {
     return null;
   }
-  return <Stack screenOptions={{ headerShown: false }} />;
+  return (
+    <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
+      <ClerkLoaded>
+        <Stack>
+          <Stack.Screen name="index" options={{ headerShown: false }} />
+          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+          <Stack.Screen name="(root)" options={{ headerShown: false }} />
+        </Stack>
+      </ClerkLoaded>
+    </ClerkProvider>
+  );
 }
